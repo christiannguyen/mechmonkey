@@ -48,7 +48,7 @@ const Listing = ({ listing }) => {
   // https://www.reddit.com/r/mechmarket/comments/lfts2q/usal_h_black_idobao_id80_w_plate_foam_w_paypal.json
 
   return (
-    <div className="mt-8 mb-8 bg-white rounded-xl border-solid shadow-xl p-5">
+    <div className="mt-8 mb-14 bg-white rounded-xl shadow-xl p-5">
       <header className="flex border-b-2  border-indigo-400 pb-4">
         <div className="w-3/4 flex">
           <div>

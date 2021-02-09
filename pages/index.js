@@ -6,7 +6,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 
 export default function Home({ _listings, clientId }) {
   const [listings, setListings] = useState(_listings);
-  console.log("listing", clientId, listings);
+  console.log("listing", listings);
 
   const fetchData = async () => {
     const baseUrl = `https://www.reddit.com/r/mechmarket/search.json?q=flair%3Aselling&restrict_sr=on&sort=new&limit=10&t=all&after=${listings.after}`;
@@ -36,6 +36,7 @@ export default function Home({ _listings, clientId }) {
   return (
     <div className="md:w-48 lg:w-1/2 m-auto">
       <InfiniteScroll
+        className="overflow-visible"
         dataLength={listings.children.length} //This is important field to render the next data
         next={fetchData}
         hasMore={true}
@@ -44,16 +45,6 @@ export default function Home({ _listings, clientId }) {
           <p style={{ textAlign: "center" }}>
             <b>Yay! You have seen it all</b>
           </p>
-        }
-        // below props only if you need pull down functionality
-        refreshFunction={fetchData}
-        pullDownToRefresh={true}
-        pullDownToRefreshThreshold={200}
-        pullDownToRefreshContent={
-          <h3 style={{ textAlign: "center" }}>&#8595; Pull down to refresh</h3>
-        }
-        releaseToRefreshContent={
-          <h3 style={{ textAlign: "center" }}>&#8593; Release to refresh</h3>
         }
       >
         {listings.children.map((listing) => (
