@@ -41,9 +41,8 @@ const Listing = ({ listing }) => {
   //   console.log(data);
   // };
 
-  // const clean = sanitizeHtml(selftext_html);
-
   // fetchImages();
+  const clean = sanitizeHtml(selftext_html);
 
   // https://www.reddit.com/r/mechmarket/comments/lfts2q/usal_h_black_idobao_id80_w_plate_foam_w_paypal.json
 
