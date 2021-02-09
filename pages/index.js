@@ -8,6 +8,25 @@ export default function Home({ _listings, clientId }) {
   const [listings, setListings] = useState(_listings);
   console.log("listing", listings);
 
+  const fetchImages = async () => {
+    const link = "https://api.imgur.com/3/album/MM013po/images";
+    const res = await fetch(link, {
+      headers: {
+        Accept: "application/json",
+        Authorization: `Client-ID ${clientId}`,
+        // 'Content-Type': 'application/json'
+      },
+      // mode: "no-cors",
+    });
+
+    console.log("res", res);
+
+    const data = await res.json();
+    console.log(data);
+  };
+
+  fetchImages();
+
   const fetchData = async () => {
     const baseUrl = `https://www.reddit.com/r/mechmarket/search.json?q=flair%3Aselling&restrict_sr=on&sort=new&limit=10&t=all&after=${listings.after}`;
 
@@ -55,16 +74,7 @@ export default function Home({ _listings, clientId }) {
   );
 }
 
-// {
-//   headers: {
-//     Accept: "application/json",
-//     Authorization: `Client-ID `,
-//     // 'Content-Type': 'application/json'
-//   },
-// });
-
 export async function getStaticProps(context) {
-  // const clientId = "ec4e747787dd72a";
   const link =
     "https://www.reddit.com/r/mechmarket/search.json?q=flair%3Aselling&restrict_sr=on&sort=new&limit=10&t=all";
   const res = await fetch(link);

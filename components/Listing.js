@@ -24,24 +24,24 @@ const Listing = ({ listing }) => {
     created,
   } = listing.data;
 
-  const fetchImages = async () => {
-    const link = "https://api.imgur.com/3/album/MM013po/images";
-    const res = await fetch(link, {
-      headers: {
-        Accept: "application/json",
-        Authorization: `Client-ID`,
-        // 'Content-Type': 'application/json'
-      },
-      // mode: "no-cors",
-    });
+  // const fetchImages = async () => {
+  //   const link = "https://api.imgur.com/3/album/MM013po/images";
+  //   const res = await fetch(link, {
+  //     headers: {
+  //       Accept: "application/json",
+  //       Authorization: `Client-ID`,
+  //       // 'Content-Type': 'application/json'
+  //     },
+  //     // mode: "no-cors",
+  //   });
 
-    console.log("res", res);
+  //   console.log("res", res);
 
-    const data = await res.json();
-    console.log(data);
-  };
+  //   const data = await res.json();
+  //   console.log(data);
+  // };
 
-  const clean = sanitizeHtml(selftext_html);
+  // const clean = sanitizeHtml(selftext_html);
 
   // fetchImages();
 
