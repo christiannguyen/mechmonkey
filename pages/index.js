@@ -1,59 +1,74 @@
-import Head from "next/head";
-import React, { useState } from "react";
-import styles from "../styles/Home.module.css";
+import React, { useState, useEffect } from "react";
 import Listing from "../components/Listing";
+import Search from "../components/Search";
 import InfiniteScroll from "react-infinite-scroll-component";
+import request from "superagent";
+import { fetchImages } from "../libs";
+import parse from "node-html-parser";
+
+const RESULTS_LIMIT = 5;
 
 export default function Home({ _listings, clientId }) {
   const [listings, setListings] = useState(_listings);
-  console.log("listing", listings);
+  const [query, setQuery] = useState("");
 
-  const fetchImages = async () => {
-    const link = "https://api.imgur.com/3/album/MM013po/images";
-    const res = await fetch(link, {
-      headers: {
-        Accept: "application/json",
-        Authorization: `Client-ID ${clientId}`,
-        // 'Content-Type': 'application/json'
-      },
-      // mode: "no-cors",
+  console.log("listing", listings);
+  const searchListings = async () => {
+    const link = "https://www.reddit.com/r/mechmarket/search.json";
+
+    const response = await request.get(link).query({
+      q: `flair:selling ${query}`,
+      restrict_sr: "on",
+      sort: "new",
+      limit: RESULTS_LIMIT,
+      t: "all",
     });
 
-    console.log("res", res);
-
-    const data = await res.json();
-    console.log(data);
+    setListings(response.body.data);
   };
 
-  fetchImages();
-
   const fetchData = async () => {
-    const baseUrl = `https://www.reddit.com/r/mechmarket/search.json?q=flair%3Aselling&restrict_sr=on&sort=new&limit=10&t=all&after=${listings.after}`;
+    const link = "https://www.reddit.com/r/mechmarket/search.json";
 
-    console.log("base", baseUrl);
-
-    const res = await fetch(baseUrl);
-    const json = await res.json();
-
-    console.log("data", json);
-
-    setTimeout(() => {
-      setListings({
-        ...listings,
-        after: json.data.after,
-        children: [...listings.children, ...json.data.children],
+    try {
+      const response = await request.get(link).query({
+        q: `flair:selling ${query}`,
+        restrict_sr: "on",
+        sort: "new",
+        limit: RESULTS_LIMIT,
+        t: "all",
+        after: listings.after,
       });
-    }, 1000);
 
-    // setListings({
-    //   ...listings,
-    //   after: json.data.after,
-    //   children: [...listings.children, ...json.data.children],
-    // });
+      await Promise.all(
+        response.body.data.children.map(async (listing) => {
+          await fetchImages(listing, clientId);
+        })
+      );
+
+      setTimeout(() => {
+        setListings({
+          ...listings,
+          after: response.body.data.after,
+          children: [...listings.children, ...response.body.data.children],
+        });
+      }, 1000);
+    } catch (err) {
+      console.log("err", err);
+    }
   };
 
   return (
     <div className="md:w-48 lg:w-1/2 m-auto">
+      <div className="text-center">
+        <Search query={query} setQuery={setQuery} />
+        <button
+          onClick={searchListings}
+          className="ml-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Search
+        </button>
+      </div>
       <InfiniteScroll
         className="overflow-visible"
         dataLength={listings.children.length} //This is important field to render the next data
@@ -75,20 +90,31 @@ export default function Home({ _listings, clientId }) {
 }
 
 export async function getStaticProps(context) {
-  const link =
-    "https://www.reddit.com/r/mechmarket/search.json?q=flair%3Aselling&restrict_sr=on&sort=new&limit=10&t=all";
-  const res = await fetch(link);
-  const data = await res.json();
+  const link = "https://www.reddit.com/r/mechmarket/search.json";
 
-  if (!data) {
+  const response = await request.get(link).query({
+    q: "flair:selling",
+    restrict_sr: "on",
+    sort: "new",
+    limit: RESULTS_LIMIT,
+    t: "all",
+  });
+
+  if (!response.body) {
     return {
       notFound: true,
     };
   }
 
+  await Promise.all(
+    response.body.data.children.map(async (listing) => {
+      await fetchImages(listing, process.env.IMG_CLIENT);
+    })
+  );
+
   return {
     props: {
-      _listings: data.data,
+      _listings: response.body.data,
       clientId: process.env.IMG_CLIENT,
     }, // will be passed to the page component as props
   };
