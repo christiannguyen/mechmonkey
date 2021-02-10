@@ -1,23 +1,24 @@
 import React, { useState, useRef, useEffect } from "react";
+import useEffectAfterMount from "../hooks/useEffectAfterMount";
 
 const Accordion = (props) => {
   const [active, setActive] = useState(true);
   const contentRef = useRef(null);
 
-  useEffect(() => {
-    setTimeout(() => {
-      const height = Math.max(
-        contentRef.current.children[0].scrollHeight,
-        contentRef.current.scrollHeight
-      );
+  useEffectAfterMount(() => {
+    // setTimeout(() => {
+    const height = Math.max(
+      contentRef.current.children[0].scrollHeight,
+      contentRef.current.scrollHeight
+    );
 
-      console.log(
-        "what",
-        contentRef.current.children[0].scrollHeight,
-        contentRef.current.scrollHeight
-      );
-      contentRef.current.style.maxHeight = active ? `${height}px` : "0px";
-    }, 0);
+    console.log(
+      "what",
+      contentRef.current.children[0].scrollHeight,
+      contentRef.current.scrollHeight
+    );
+    contentRef.current.style.maxHeight = active ? `${height}px` : "0px";
+    // }, 0);
   }, [contentRef, active]);
 
   const toggleActive = (e) => {
