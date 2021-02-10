@@ -10,6 +10,13 @@ const Accordion = (props) => {
       contentRef.current.scrollHeight
     );
 
+    console.log(
+      "what",
+      contentRef.current.children[0].offsetHeight,
+      contentRef.current.children[0].scrollHeight,
+      contentRef.current.scrollHeight
+    );
+
     contentRef.current.style.maxHeight = active ? `${height}px` : "0px";
   }, [contentRef, active]);
 
