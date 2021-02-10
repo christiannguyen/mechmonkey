@@ -5,9 +5,12 @@ const Accordion = (props) => {
   const contentRef = useRef(null);
 
   useEffect(() => {
-    contentRef.current.style.maxHeight = active
-      ? `${contentRef.current.children[0].scrollHeight}px`
-      : "0px";
+    const height = Math.max(
+      contentRef.current.children[0].offsetHeight,
+      contentRef.current.scrollHeight
+    );
+
+    contentRef.current.style.maxHeight = active ? `${height}px` : "0px";
   }, [contentRef, active]);
 
   const toggleActive = (e) => {
