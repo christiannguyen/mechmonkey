@@ -58,34 +58,46 @@ export default function Home({ _listings, clientId }) {
     }
   };
 
+  const scrollToTop = () => {
+    window.scroll({ top: 0, behavior: "smooth" });
+  };
+
   return (
-    <div className="md:w-48 lg:w-1/2 m-auto">
-      <div className="text-center">
-        <Search query={query} setQuery={setQuery} />
-        <button
-          onClick={searchListings}
-          className="ml-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+    <>
+      <div className="sm:w-5/6 md:w2/3 lg:w-1/2 m-auto">
+        <div className="text-center">
+          <Search query={query} setQuery={setQuery} />
+          <button
+            onClick={searchListings}
+            className="ml-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Search
+          </button>
+        </div>
+        <InfiniteScroll
+          className="overflow-visible"
+          dataLength={listings.children.length} //This is important field to render the next data
+          next={fetchData}
+          hasMore={true}
+          loader={<h4>Loading...</h4>}
+          endMessage={
+            <p style={{ textAlign: "center" }}>
+              <b>Yay! You have seen it all</b>
+            </p>
+          }
         >
-          Search
-        </button>
+          {listings.children.map((listing) => (
+            <Listing key={listing.data.id} listing={listing} />
+          ))}
+        </InfiniteScroll>
       </div>
-      <InfiniteScroll
-        className="overflow-visible"
-        dataLength={listings.children.length} //This is important field to render the next data
-        next={fetchData}
-        hasMore={true}
-        loader={<h4>Loading...</h4>}
-        endMessage={
-          <p style={{ textAlign: "center" }}>
-            <b>Yay! You have seen it all</b>
-          </p>
-        }
+      <span
+        onClick={scrollToTop}
+        className="fixed cursor-pointer rounded-full bottom-12 right-12 bg-blue-500 text-white text-bold py-2 px-4 text-3xl transition duration-300 ease-in-out transform hover:-translate-y-0.5 hover:scale-105"
       >
-        {listings.children.map((listing) => (
-          <Listing key={listing.data.id} listing={listing} />
-        ))}
-      </InfiniteScroll>
-    </div>
+        ☝️
+      </span>
+    </>
   );
 }
 
