@@ -6,7 +6,11 @@ const retrieveImgUrls = (string) => {
   const parser = parse(decode(string));
   const urls = [];
 
-  parser.querySelectorAll("a").forEach((x) => urls.push(x.attributes.href));
+  parser.querySelectorAll("a").forEach((x) => {
+    if (x.attributes.href.includes(".com")) {
+      urls.push(x.attributes.href);
+    }
+  });
 
   return urls;
 };

@@ -4,18 +4,20 @@ import Search from "../components/Search";
 import InfiniteScroll from "react-infinite-scroll-component";
 import request from "superagent";
 import { fetchImages } from "../libs";
-import parse from "node-html-parser";
+import Loader from "react-loader-spinner";
 
 const RESULTS_LIMIT = 5;
 
 export default function Home({ _listings, clientId }) {
   const [listings, setListings] = useState(_listings);
+  const [isLoading, setLoading] = useState(false);
   const [query, setQuery] = useState("");
 
-  console.log("listing", listings);
-  const searchListings = async () => {
+  const searchListings = async (e) => {
+    e.preventDefault();
     const link = "https://www.reddit.com/r/mechmarket/search.json";
 
+    setLoading(true);
     const response = await request.get(link).query({
       q: `flair:selling ${query}`,
       restrict_sr: "on",
@@ -25,6 +27,7 @@ export default function Home({ _listings, clientId }) {
     });
 
     setListings(response.body.data);
+    setLoading(false);
   };
 
   const fetchData = async () => {
@@ -66,30 +69,30 @@ export default function Home({ _listings, clientId }) {
     <>
       <div className="sm:w-5/6 md:w2/3 lg:w-1/2 m-auto">
         <div className="text-center">
-          <Search query={query} setQuery={setQuery} />
-          <button
-            onClick={searchListings}
-            className="ml-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Search
-          </button>
+          <Search query={query} setQuery={setQuery} handler={searchListings} />
         </div>
-        <InfiniteScroll
-          className="overflow-visible"
-          dataLength={listings.children.length} //This is important field to render the next data
-          next={fetchData}
-          hasMore={true}
-          loader={<h4>Loading...</h4>}
-          endMessage={
-            <p style={{ textAlign: "center" }}>
-              <b>Yay! You have seen it all</b>
-            </p>
-          }
-        >
-          {listings.children.map((listing) => (
-            <Listing key={listing.data.id} listing={listing} />
-          ))}
-        </InfiniteScroll>
+        {isLoading ? (
+          <div className="absolute top-1/4 left-1/2">
+            <Loader type="TailSpin" color="#00BFFF" height={50} width={50} />
+          </div>
+        ) : (
+          <InfiniteScroll
+            className="overflow-visible"
+            dataLength={listings.children.length} //This is important field to render the next data
+            next={fetchData}
+            hasMore={true}
+            loader={<h4>Loading...</h4>}
+            endMessage={
+              <p style={{ textAlign: "center" }}>
+                <b>Yay! You have seen it all</b>
+              </p>
+            }
+          >
+            {listings.children.map((listing) => (
+              <Listing key={listing.data.id} listing={listing} />
+            ))}
+          </InfiniteScroll>
+        )}
       </div>
       <span
         onClick={scrollToTop}
