@@ -54,13 +54,15 @@ const Listing = ({ listing }) => {
                     {link_flair_text}
                   </span>
                 </div>
-                <a
-                  href={url}
-                  target="_blank"
-                  className="w-5/6 text-sm text-base text-indigo-500"
-                >
-                  {title}
-                </a>
+                <div>
+                  <a
+                    href={url}
+                    target="_blank"
+                    className="w-5/6 text-sm text-base text-indigo-500"
+                  >
+                    {title}
+                  </a>
+                </div>
               </div>
             </div>
             <div className="ml-auto w-1/4 text-right text-sm">

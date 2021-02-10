@@ -5,7 +5,7 @@ const Search = ({ query, setQuery, handler }) => {
     <>
       <form onSubmit={handler}>
         <input
-          className="py-2 pl-4 w-1/2 border-2 shadow-lg border-gray-200 outline-none rounded-lg"
+          className="py-2 pl-4 w-2/3 border-2 border-gray-100 outline-none rounded-lg search-input"
           type="text"
           placeholder="Search by title"
           value={query}

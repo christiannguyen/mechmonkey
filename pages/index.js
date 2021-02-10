@@ -69,6 +69,9 @@ export default function Home({ _listings, clientId }) {
     <>
       <div className="sm:w-5/6 md:w2/3 lg:w-1/2 m-auto">
         <div className="text-center">
+          <h2 className="text-5xl mb-10 text-gray-800 font-light">
+            mechmonkey.
+          </h2>
           <Search query={query} setQuery={setQuery} handler={searchListings} />
         </div>
         {isLoading ? (
