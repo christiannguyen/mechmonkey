@@ -49,7 +49,7 @@ export const fetchImages = async (listing, clientId) => {
 
           response.body.data.forEach((x) => imageUrls.push(x.link));
         } else {
-          imageUrls.push(urlData.href);
+          imageUrls.push(urlData.href + ".jpg");
         }
 
         listing.data.imageUrls = imageUrls;

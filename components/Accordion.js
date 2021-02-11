@@ -15,7 +15,6 @@ const Accordion = (props) => {
   }, [contentRef, active]);
 
   const toggleActive = (e) => {
-    console.log("e", e);
     setActive(!active);
   };
 

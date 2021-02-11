@@ -8,10 +8,31 @@ import Loader from "react-loader-spinner";
 
 const RESULTS_LIMIT = 5;
 
-export default function Home({ _listings, clientId }) {
-  const [listings, setListings] = useState(_listings);
-  const [isLoading, setLoading] = useState(false);
+export default function Home({ clientId }) {
+  const [listings, setListings] = useState([]);
+  const [isLoading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
+
+  useEffect(async () => {
+    const link = "https://www.reddit.com/r/mechmarket/search.json";
+
+    const response = await request.get(link).query({
+      q: `title:("[US-") flair:selling`,
+      restrict_sr: "on",
+      sort: "new",
+      limit: RESULTS_LIMIT,
+      t: "all",
+    });
+
+    await Promise.all(
+      response.body.data.children.map(async (listing) => {
+        await fetchImages(listing, clientId);
+      })
+    );
+
+    setListings(response.body.data);
+    setLoading(false);
+  }, []);
 
   const searchListings = async (e) => {
     e.preventDefault();
@@ -35,7 +56,7 @@ export default function Home({ _listings, clientId }) {
 
     try {
       const response = await request.get(link).query({
-        q: `flair:selling ${query}`,
+        q: `title:("[US-") flair:selling ${query}`,
         restrict_sr: "on",
         sort: "new",
         limit: RESULTS_LIMIT,
@@ -70,7 +91,7 @@ export default function Home({ _listings, clientId }) {
       <div className="sm:w-5/6 md:w2/3 lg:w-1/2 m-auto">
         <div className="text-center">
           <h2 className="text-5xl mb-10 text-gray-800 font-light">
-            mechmonkey.
+            mechm🙈nkey.
           </h2>
           <Search query={query} setQuery={setQuery} handler={searchListings} />
         </div>
@@ -81,7 +102,7 @@ export default function Home({ _listings, clientId }) {
         ) : (
           <InfiniteScroll
             className="overflow-visible"
-            dataLength={listings.children.length} //This is important field to render the next data
+            dataLength={listings.children.length || 0} //This is important field to render the next data
             next={fetchData}
             hasMore={true}
             loader={<h4>Loading...</h4>}
@@ -108,32 +129,9 @@ export default function Home({ _listings, clientId }) {
 }
 
 export async function getStaticProps(context) {
-  const link = "https://www.reddit.com/r/mechmarket/search.json";
-
-  const response = await request.get(link).query({
-    q: "flair:selling",
-    restrict_sr: "on",
-    sort: "new",
-    limit: RESULTS_LIMIT,
-    t: "all",
-  });
-
-  if (!response.body) {
-    return {
-      notFound: true,
-    };
-  }
-
-  await Promise.all(
-    response.body.data.children.map(async (listing) => {
-      await fetchImages(listing, process.env.IMG_CLIENT);
-    })
-  );
-
   return {
     props: {
-      _listings: response.body.data,
       clientId: process.env.IMG_CLIENT,
-    }, // will be passed to the page component as props
+    },
   };
 }

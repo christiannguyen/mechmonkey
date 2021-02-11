@@ -6,6 +6,8 @@ import sanitizeHtml from "sanitize-html";
 import ReactHtmlParser from "react-html-parser";
 import { decode } from "html-entities";
 import Accordion from "../components/Accordion";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus, faMinus } from "@fortawesome/free-solid-svg-icons";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -43,8 +45,12 @@ const Listing = ({ listing }) => {
     <Accordion
       header={(active) => (
         <div className="pt-6 px-8">
-          <span className="absolute rounded-full -top-2 -right-4 bg-blue-600 text-white text-bold rounded-sm px-2 text-md">
-            {active ? "↑" : "↓"}
+          <span className="absolute rounded-full -top-2 -right-3 bg-blue-600 text-white text-bold rounded-sm py-1 px-2 text-xs">
+            {active ? (
+              <FontAwesomeIcon icon={faMinus} />
+            ) : (
+              <FontAwesomeIcon icon={faPlus} />
+            )}
           </span>
           <header className="flex  pb-4 justify-center items-center">
             <div className="w-3/4">
@@ -74,7 +80,7 @@ const Listing = ({ listing }) => {
                 {author}
               </a>
               <div>
-                <p>{parsedTime.format("D/M/YYYY h:mm:ss a")}</p>
+                <p>{parsedTime.format("M/D/YYYY h:mm a")}</p>
                 <p className="italic text-gray-500">{parsedTime.fromNow()}</p>
               </div>
             </div>
