@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSun, faMoon, faArrowUp } from "@fortawesome/free-solid-svg-icons";
 import Loader from "react-loader-spinner";
 import Image from "next/image";
+import useLocalStorage from "../hooks/useLocalStorage";
 
 const RESULTS_LIMIT = 5;
 const LINK = "https://www.reddit.com/r/mechmarket/search.json";
@@ -20,7 +21,13 @@ export default function Home({ clientId }) {
   const [listings, setListings] = useState([]);
   const [isLoading, setLoading] = useState(false);
   const [currentFlair, setCurrentFlair] = useState(INITIAL_FLAIR);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkModeLocalStorage, setDarkModeLocalStorage] = useLocalStorage(
+    "darkMode",
+    "false"
+  );
+
+  const [darkMode, setDarkMode] = useState(darkModeLocalStorage);
+  console.log("hmm", darkModeLocalStorage, darkMode);
   const [hasMoreResults, setHasMoreResults] = useState(true);
   const searchRef = useRef(null);
 
@@ -162,6 +169,7 @@ export default function Home({ clientId }) {
   };
 
   const dark = darkMode ? "dark" : "";
+  console.log("dark is", dark);
 
   return (
     <div id="page" className={`${dark}`}>
@@ -187,7 +195,10 @@ export default function Home({ clientId }) {
                     <FontAwesomeIcon icon={faSun} className="text-yellow-400" />
                   ),
                 }}
-                onChange={() => setDarkMode(!darkMode)}
+                onChange={() => {
+                  setDarkModeLocalStorage(!darkMode);
+                  setDarkMode(!darkMode);
+                }}
               />
             </div>
             <Filters handler={handleFlairChange} />
