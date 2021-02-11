@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Listing from "../components/Listing";
 import Search from "../components/Search";
+import Filters from "../components/Filters";
 import InfiniteScroll from "react-infinite-scroll-component";
 import request from "superagent";
 import { fetchImages } from "../libs";
@@ -12,17 +13,25 @@ import Image from "next/image";
 
 const RESULTS_LIMIT = 5;
 const LINK = "https://www.reddit.com/r/mechmarket/search.json";
+const INITIAL_FLAIR = "selling";
 
 export default function Home({ clientId }) {
   const [currentQuery, setCurrentQuery] = useState("");
   const [listings, setListings] = useState([]);
-  const [isLoading, setLoading] = useState(true);
+  const [isLoading, setLoading] = useState(false);
+  const [currentFlair, setCurrentFlair] = useState(INITIAL_FLAIR);
   const [darkMode, setDarkMode] = useState(false);
+  const [hasMoreResults, setHasMoreResults] = useState(false);
   const searchRef = useRef(null);
 
   useEffect(async () => {
+    await retrieveFreshData();
+  }, []);
+
+  const retrieveFreshData = async (flair = "") => {
+    setLoading(true);
     const response = await request.get(LINK).query({
-      q: `title:("[US-") flair:selling`,
+      q: `title:("[US-") flair:${flair || currentFlair} ${currentQuery}`,
       restrict_sr: "on",
       sort: "new",
       limit: RESULTS_LIMIT,
@@ -37,14 +46,14 @@ export default function Home({ clientId }) {
 
     setListings(response.body.data);
     setLoading(false);
-  }, []);
+  };
 
   const searchListings = async (e) => {
     e.preventDefault();
 
     setLoading(true);
     const response = await request.get(LINK).query({
-      q: `title:("[US-") flair:selling ${searchRef.current.value}`,
+      q: `title:("[US-") flair:${currentFlair} ${searchRef.current.value}`,
       restrict_sr: "on",
       sort: "new",
       limit: RESULTS_LIMIT,
@@ -59,7 +68,7 @@ export default function Home({ clientId }) {
   const fetchData = async () => {
     try {
       const response = await request.get(LINK).query({
-        q: `title:("[US-") flair:selling ${currentQuery}`,
+        q: `title:("[US-") flair:${currentFlair} ${currentQuery}`,
         restrict_sr: "on",
         sort: "new",
         limit: RESULTS_LIMIT,
@@ -85,6 +94,11 @@ export default function Home({ clientId }) {
     }
   };
 
+  const handleFlairChange = async (flair) => {
+    await retrieveFreshData(flair);
+    setCurrentFlair(flair);
+  };
+
   const scrollToTop = () => {
     window.scroll({ top: 0, behavior: "smooth" });
   };
@@ -96,7 +110,7 @@ export default function Home({ clientId }) {
       <div className="py-10 bg-gray-50 h-full min-h-screen transition-colors duration-300 ease-in-out dark:bg-gray-900 ">
         <div className="sm:w-5/6 md:w2/3 lg:w-1/2 m-auto">
           <header className="text-left">
-            <div className="flex mb-14 relative justify-between items-center">
+            <div className="flex mb-10 relative justify-between items-center">
               <h2 className="text-5xl  text-gray-800 font-light dark:text-blue-50">
                 mechm
                 <Image src="/monkey-img.png" alt="me" width="48" height="48" />
@@ -118,6 +132,7 @@ export default function Home({ clientId }) {
                 onChange={() => setDarkMode(!darkMode)}
               />
             </div>
+            <Filters handler={handleFlairChange} />
             <Search ref={searchRef} handler={searchListings} />
           </header>
           {isLoading ? (
@@ -127,7 +142,7 @@ export default function Home({ clientId }) {
           ) : (
             <InfiniteScroll
               className="overflow-visible"
-              dataLength={listings.children.length || 0} //This is important field to render the next data
+              dataLength={listings.children?.length || 0} //This is important field to render the next data
               next={fetchData}
               hasMore={true}
               loader={<h4>Loading...</h4>}
@@ -137,7 +152,7 @@ export default function Home({ clientId }) {
                 </p>
               }
             >
-              {listings.children.map((listing) => (
+              {listings.children?.map((listing) => (
                 <Listing key={listing.data.id} listing={listing} dark={dark} />
               ))}
             </InfiniteScroll>

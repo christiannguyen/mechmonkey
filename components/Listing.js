@@ -40,7 +40,16 @@ const Listing = ({ listing, dark }) => {
 
   const clean = sanitizeHtml(selftext_html);
   const parsedTime = dayjs.tz(dayjs.unix(created_utc), potentialTimezone);
-
+  const linkFlairText = () => {
+    switch (link_flair_text) {
+      case "Group Buy":
+        return "GB";
+      case "Interest Check":
+        return "IC";
+      default:
+        return link_flair_text;
+    }
+  };
   return (
     <Accordion
       header={(active) => (
@@ -57,7 +66,7 @@ const Listing = ({ listing, dark }) => {
               <div className="flex">
                 <div>
                   <span className="p-1.5 w-100 uppercase text-xs rounded-md border-solid bg-blue-200 text-blue-800 font-bold border-gray-200 mr-2 dark:text-blue-300 dark:bg-blue-900">
-                    {link_flair_text}
+                    {linkFlairText()}
                   </span>
                 </div>
                 <div>
