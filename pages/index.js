@@ -6,21 +6,22 @@ import request from "superagent";
 import { fetchImages } from "../libs";
 import Toggle from "react-toggle";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSun, faMoon } from "@fortawesome/free-solid-svg-icons";
+import { faSun, faMoon, faArrowUp } from "@fortawesome/free-solid-svg-icons";
 import Loader from "react-loader-spinner";
+import Image from "next/image";
 
 const RESULTS_LIMIT = 5;
+const LINK = "https://www.reddit.com/r/mechmarket/search.json";
 
 export default function Home({ clientId }) {
+  const [currentQuery, setCurrentQuery] = useState("");
   const [listings, setListings] = useState([]);
   const [isLoading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
   const searchRef = useRef(null);
 
   useEffect(async () => {
-    const link = "https://www.reddit.com/r/mechmarket/search.json";
-
-    const response = await request.get(link).query({
+    const response = await request.get(LINK).query({
       q: `title:("[US-") flair:selling`,
       restrict_sr: "on",
       sort: "new",
@@ -40,27 +41,25 @@ export default function Home({ clientId }) {
 
   const searchListings = async (e) => {
     e.preventDefault();
-    const link = "https://www.reddit.com/r/mechmarket/search.json";
 
     setLoading(true);
-    const response = await request.get(link).query({
-      q: `flair:selling ${searchRef.current.value}`,
+    const response = await request.get(LINK).query({
+      q: `title:("[US-") flair:selling ${searchRef.current.value}`,
       restrict_sr: "on",
       sort: "new",
       limit: RESULTS_LIMIT,
       t: "all",
     });
 
+    setCurrentQuery(searchRef.current.value);
     setListings(response.body.data);
     setLoading(false);
   };
 
   const fetchData = async () => {
-    const link = "https://www.reddit.com/r/mechmarket/search.json";
-
     try {
-      const response = await request.get(link).query({
-        q: `title:("[US-") flair:selling ${searchRef.current.value}`,
+      const response = await request.get(LINK).query({
+        q: `title:("[US-") flair:selling ${currentQuery}`,
         restrict_sr: "on",
         sort: "new",
         limit: RESULTS_LIMIT,
@@ -99,7 +98,9 @@ export default function Home({ clientId }) {
           <header className="text-left">
             <div className="flex mb-14 relative justify-between items-center">
               <h2 className="text-5xl  text-gray-800 font-light dark:text-blue-50">
-                mechm🙈nkey.
+                mechm
+                <Image src="/monkey-img.png" alt="me" width="48" height="48" />
+                nkey.
               </h2>
               <Toggle
                 defaultChecked={darkMode}
@@ -146,7 +147,7 @@ export default function Home({ clientId }) {
           onClick={scrollToTop}
           className="fixed cursor-pointer rounded-full bottom-12 right-12 bg-blue-500 text-white text-bold py-2 px-4 text-3xl transition duration-300 ease-in-out transform hover:-translate-y-0.5 hover:scale-105"
         >
-          ☝️
+          <FontAwesomeIcon icon={faArrowUp} />
         </span>
       </div>
     </div>
