@@ -14,12 +14,12 @@ const Accordion = (props) => {
     contentRef.current.style.maxHeight = active ? `${height}px` : "0px";
   }, [contentRef, active]);
 
-  const toggleActive = (e) => {
+  const toggleActive = () => {
     setActive(!active);
   };
 
   return (
-    <div className="mt-8 mb-14 bg-white rounded-xl shadow-xl  relative">
+    <div className="mt-8 mb-14 bg-white rounded-xl shadow-xl relative dark:bg-gray-800 dark:bg-opacity-100">
       <div className="cursor-pointer" onClick={toggleActive}>
         {props.header(active)}
       </div>
@@ -28,7 +28,7 @@ const Accordion = (props) => {
         ref={contentRef}
         className=" px-8 transition-all duration-300 ease-in-out overflow-hidden"
       >
-        <div className="border-t-2 border-indigo-400 pb-6">
+        <div className="border-t-2 border-blue-400 pb-6 dark:border-indigo-300">
           {props.children}
         </div>
       </div>

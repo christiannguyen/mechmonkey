@@ -25,7 +25,7 @@ const Image = ({ url }) => {
   );
 };
 
-const Listing = ({ listing }) => {
+const Listing = ({ listing, dark }) => {
   const {
     url,
     title,
@@ -45,43 +45,50 @@ const Listing = ({ listing }) => {
     <Accordion
       header={(active) => (
         <div className="pt-6 px-8">
-          <span className="absolute rounded-full -top-2 -right-3 bg-blue-600 text-white text-bold rounded-sm py-1 px-2 text-xs">
+          <span className="absolute rounded-full -top-2 -right-3 bg-blue-600 text-white text-bold rounded-sm py-1 px-2 text-xs dark:bg-blue-500">
             {active ? (
               <FontAwesomeIcon icon={faMinus} />
             ) : (
               <FontAwesomeIcon icon={faPlus} />
             )}
           </span>
-          <header className="flex  pb-4 justify-center items-center">
+          <header className="flex pb-4 justify-center items-center">
             <div className="w-3/4">
               <div className="flex">
                 <div>
-                  <span className="p-1.5 w-100 uppercase text-xs rounded-md border-solid bg-blue-200 text-blue-800 font-bold border-gray-200 mr-2">
+                  <span className="p-1.5 w-100 uppercase text-xs rounded-md border-solid bg-blue-200 text-blue-800 font-bold border-gray-200 mr-2 dark:text-blue-300 dark:bg-blue-900">
                     {link_flair_text}
                   </span>
                 </div>
                 <div>
                   <a
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
                     href={url}
                     target="_blank"
-                    className="w-5/6 text-sm text-base text-indigo-500"
+                    className="w-5/6 text-sm text-base text-blue-600 dark:text-indigo-200"
                   >
                     {title}
                   </a>
                 </div>
               </div>
             </div>
-            <div className="ml-auto w-1/4 text-right text-sm">
+            <div className="ml-auto w-1/4 text-right">
               <a
                 href={`https://www.reddit.com/user/${author}`}
                 target="_blank"
-                className="text-red-600 font-semibold"
+                className="text-red-600 font-semibold text-base dark:text-red-300"
               >
                 {author}
               </a>
               <div>
-                <p>{parsedTime.format("M/D/YYYY h:mm a")}</p>
-                <p className="italic text-gray-500">{parsedTime.fromNow()}</p>
+                <p className="text-sm dark:text-gray-100 dark:text-opacity-90">
+                  {parsedTime.format("M/D/YYYY h:mm a")}
+                </p>
+                <p className="italic text-gray-500 text-sm dark:text-gray-400">
+                  {parsedTime.fromNow()}
+                </p>
               </div>
             </div>
           </header>
@@ -89,21 +96,19 @@ const Listing = ({ listing }) => {
       )}
     >
       <div className="mt-8">
-        <div className="listing-text">{ReactHtmlParser(decode(clean))}</div>
+        <div className={`listing-text dark:text-gray-200 ${dark}`}>
+          {ReactHtmlParser(decode(clean))}
+        </div>
       </div>
       <div className="flex flex-wrap mt-6 mb-4 max-h-96 overflow-y-scroll">
         {imageUrls.map((image) => (
           <Image url={image} />
         ))}
       </div>
-      <div>
-        <span className="mt-2 text-sm text-green-700 font-semibold">
-          {ups} upvote(s)
-        </span>
-        <span> -- </span>
-        <span className="mt-2 text-sm text-green-700 font-semibold">
-          {num_comments} comment(s)
-        </span>
+      <div className="ext-sm text-green-700 font-semibold dark:text-green-400">
+        <span className="mt-2">{ups} upvote(s)</span>
+        <span> – </span>
+        <span className="mt-2">{num_comments} comment(s)</span>
       </div>
     </Accordion>
   );
