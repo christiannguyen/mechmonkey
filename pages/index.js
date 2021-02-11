@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Listing from "../components/Listing";
 import Search from "../components/Search";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -15,7 +15,7 @@ export default function Home({ clientId }) {
   const [listings, setListings] = useState([]);
   const [isLoading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
-  const [query, setQuery] = useState("");
+  const searchRef = useRef(null);
 
   useEffect(async () => {
     const link = "https://www.reddit.com/r/mechmarket/search.json";
@@ -44,7 +44,7 @@ export default function Home({ clientId }) {
 
     setLoading(true);
     const response = await request.get(link).query({
-      q: `flair:selling ${query}`,
+      q: `flair:selling ${searchRef.current.value}`,
       restrict_sr: "on",
       sort: "new",
       limit: RESULTS_LIMIT,
@@ -117,11 +117,7 @@ export default function Home({ clientId }) {
                 onChange={() => setDarkMode(!darkMode)}
               />
             </div>
-            <Search
-              query={query}
-              setQuery={setQuery}
-              handler={searchListings}
-            />
+            <Search ref={searchRef} handler={searchListings} />
           </header>
           {isLoading ? (
             <div className="absolute top-1/4 left-1/2">
