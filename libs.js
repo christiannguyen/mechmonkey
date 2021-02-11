@@ -59,3 +59,30 @@ export const fetchImages = async (listing, clientId) => {
     })
   );
 };
+
+export const flairChecker = (flair) => {
+  switch (flair) {
+    case "Group Buy":
+      return "GB";
+    case "Interest Check":
+      return "IC";
+    default:
+      return flair;
+  }
+};
+
+export const addLocale = (shouldAdd) => {
+  if (shouldAdd) {
+    return `title:("[US-")`;
+  }
+
+  return "";
+};
+
+export const addLocaleOnFlair = (flair) => {
+  if (flair === "buying" || flair === "selling") {
+    return `title:("[US-")`;
+  }
+
+  return "";
+};

@@ -4,7 +4,7 @@ import Search from "../components/Search";
 import Filters from "../components/Filters";
 import InfiniteScroll from "react-infinite-scroll-component";
 import request from "superagent";
-import { fetchImages } from "../libs";
+import { fetchImages, addLocaleOnFlair } from "../libs";
 import Toggle from "react-toggle";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSun, faMoon, faArrowUp } from "@fortawesome/free-solid-svg-icons";
@@ -21,7 +21,7 @@ export default function Home({ clientId }) {
   const [isLoading, setLoading] = useState(false);
   const [currentFlair, setCurrentFlair] = useState(INITIAL_FLAIR);
   const [darkMode, setDarkMode] = useState(false);
-  const [hasMoreResults, setHasMoreResults] = useState(false);
+  const [hasMoreResults, setHasMoreResults] = useState(true);
   const searchRef = useRef(null);
 
   useEffect(async () => {
@@ -30,8 +30,11 @@ export default function Home({ clientId }) {
 
   const retrieveFreshData = async (flair = "") => {
     setLoading(true);
+
     const response = await request.get(LINK).query({
-      q: `title:("[US-") flair:${flair || currentFlair} ${currentQuery}`,
+      q: `${addLocaleOnFlair(flair || currentFlair)} flair:${
+        flair || currentFlair
+      } ${currentQuery}`,
       restrict_sr: "on",
       sort: "new",
       limit: RESULTS_LIMIT,
@@ -44,6 +47,7 @@ export default function Home({ clientId }) {
       })
     );
 
+    setHasMoreResults(true);
     setListings(response.body.data);
     setLoading(false);
   };
@@ -52,14 +56,24 @@ export default function Home({ clientId }) {
     e.preventDefault();
 
     setLoading(true);
+
     const response = await request.get(LINK).query({
-      q: `title:("[US-") flair:${currentFlair} ${searchRef.current.value}`,
+      q: `${addLocaleOnFlair(currentFlair)} flair:${currentFlair} ${
+        searchRef.current.value
+      }`,
       restrict_sr: "on",
       sort: "new",
       limit: RESULTS_LIMIT,
       t: "all",
     });
 
+    await Promise.all(
+      response.body.data.children.map(async (listing) => {
+        await fetchImages(listing, clientId);
+      })
+    );
+
+    setHasMoreResults(true);
     setCurrentQuery(searchRef.current.value);
     setListings(response.body.data);
     setLoading(false);
@@ -68,7 +82,9 @@ export default function Home({ clientId }) {
   const fetchData = async () => {
     try {
       const response = await request.get(LINK).query({
-        q: `title:("[US-") flair:${currentFlair} ${currentQuery}`,
+        q: `${addLocaleOnFlair(
+          currentFlair
+        )} flair:${currentFlair} ${currentQuery}`,
         restrict_sr: "on",
         sort: "new",
         limit: RESULTS_LIMIT,
@@ -82,13 +98,17 @@ export default function Home({ clientId }) {
         })
       );
 
-      setTimeout(() => {
-        setListings({
-          ...listings,
-          after: response.body.data.after,
-          children: [...listings.children, ...response.body.data.children],
-        });
-      }, 1000);
+      if (!response.body.data.after) {
+        setHasMoreResults(false);
+      } else {
+        setTimeout(() => {
+          setListings({
+            ...listings,
+            after: response.body.data.after,
+            children: [...listings.children, ...response.body.data.children],
+          });
+        }, 1000);
+      }
     } catch (err) {
       console.log("err", err);
     }
@@ -101,6 +121,44 @@ export default function Home({ clientId }) {
 
   const scrollToTop = () => {
     window.scroll({ top: 0, behavior: "smooth" });
+  };
+
+  const renderListings = () => {
+    if (listings.children?.length === 0) {
+      return (
+        <div className="flex flex-col items-center mt-12">
+          <Image src="/crying-face-img.png" alt="me" width="64" height="64" />
+          <p className="mt-4 font-bold text-lg dark:text-gray-200">
+            No results found
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <InfiniteScroll
+        className="overflow-visible"
+        dataLength={listings.children?.length || 0} //This is important field to render the next data
+        next={fetchData}
+        hasMore={hasMoreResults}
+        loader={<h4>Loading...</h4>}
+        endMessage={
+          <p className="mt-4 font-bold text-lg text-center dark:text-gray-200">
+            Yay! You have seen it all{" "}
+            <Image
+              src="/partying-face-img.png"
+              alt="me"
+              width="48"
+              height="48"
+            />
+          </p>
+        }
+      >
+        {listings.children?.map((listing) => (
+          <Listing key={listing.data.id} listing={listing} dark={dark} />
+        ))}
+      </InfiniteScroll>
+    );
   };
 
   const dark = darkMode ? "dark" : "";
@@ -140,22 +198,7 @@ export default function Home({ clientId }) {
               <Loader type="TailSpin" color="#00BFFF" height={50} width={50} />
             </div>
           ) : (
-            <InfiniteScroll
-              className="overflow-visible"
-              dataLength={listings.children?.length || 0} //This is important field to render the next data
-              next={fetchData}
-              hasMore={true}
-              loader={<h4>Loading...</h4>}
-              endMessage={
-                <p style={{ textAlign: "center" }}>
-                  <b>Yay! You have seen it all</b>
-                </p>
-              }
-            >
-              {listings.children?.map((listing) => (
-                <Listing key={listing.data.id} listing={listing} dark={dark} />
-              ))}
-            </InfiniteScroll>
+            renderListings()
           )}
         </div>
         <span
