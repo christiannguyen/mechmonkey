@@ -60,7 +60,7 @@ export default function Home({ clientId }) {
 
     try {
       const response = await request.get(link).query({
-        q: `title:("[US-") flair:selling ${query}`,
+        q: `title:("[US-") flair:selling ${searchRef.current.value}`,
         restrict_sr: "on",
         sort: "new",
         limit: RESULTS_LIMIT,
